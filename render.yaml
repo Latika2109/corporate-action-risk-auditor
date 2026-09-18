@@ -1,0 +1,33 @@
+databases:
+  - name: risk-auditor-db
+    plan: free
+    databaseName: risk_auditor
+    user: risk_auditor
+
+services:
+  - type: web
+    name: risk-auditor-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: risk-auditor-db
+          property: connectionString
+
+  - type: web
+    name: risk-auditor-frontend
+    runtime: python
+    plan: free
+    rootDir: frontend
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: risk-auditor-backend
+          property: hostport

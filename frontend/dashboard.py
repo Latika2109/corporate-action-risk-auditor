@@ -12,6 +12,11 @@ import requests
 import streamlit as st
 
 API_BASE = os.getenv("API_BASE_URL", "http://localhost:8000")
+if not API_BASE.startswith(("http://", "https://")):
+    # Render's `fromService: host` gives a bare private-network hostname
+    # with no scheme (e.g. "risk-auditor-backend"); the private network
+    # is plain HTTP.
+    API_BASE = f"http://{API_BASE}"
 
 st.set_page_config(page_title="Corporate Action Risk Auditor", layout="wide")
 st.title("Corporate Action Risk Auditor")

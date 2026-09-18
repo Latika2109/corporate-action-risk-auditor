@@ -188,50 +188,52 @@ Set `API_BASE_URL` env var if the backend isn't on `localhost:8000`
 
 ### Phase 5 — Deployment (Day 5 afternoon)
 
-Both `Procfile`s are already in place. Two options:
+Deployed via a Render **Blueprint** ([`render.yaml`](render.yaml)) that
+provisions all three pieces — backend, frontend, and a free Postgres
+instance — from one file, wired together automatically.
 
-#### Render
+#### Render (one-click Blueprint)
 
-1. Push this repo to GitHub.
-2. **Backend (Web Service):**
-   - New → Web Service → connect repo, root directory `backend`
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - Add a **PostgreSQL** instance (Render → New → PostgreSQL), then set env
-     var `DATABASE_URL` on the backend service to the provided internal
-     connection string.
-3. **Frontend (Web Service):**
-   - New → Web Service → same repo, root directory `frontend`
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0`
-   - Env var `API_BASE_URL` = the backend service's public Render URL.
+1. Push this repo to GitHub (already done).
+2. In the Render dashboard: **New → Blueprint**, connect this repo. Render
+   reads `render.yaml` from the repo root and provisions:
+   - `risk-auditor-db` — a free Postgres instance
+   - `risk-auditor-backend` — the FastAPI service, with `DATABASE_URL`
+     auto-injected from the Postgres instance
+   - `risk-auditor-frontend` — the Streamlit dashboard, with `API_BASE_URL`
+     auto-injected as the backend's private-network `host:port`
+3. Click **Apply**. Both services build and deploy; no manual env var entry
+   needed — the Blueprint's `fromDatabase` / `fromService` references handle
+   the wiring.
+4. Once live, open the frontend service's public URL to use the dashboard.
 
-#### Railway
+The two services talk to each other over Render's private network (free,
+faster than a public hop), which is why `API_BASE_URL` resolves to a bare
+`host:port` rather than a public URL — `frontend/dashboard.py` auto-prepends
+`http://` if the env var has no scheme, so no manual tweaking is needed.
 
-```bash
-railway login
-railway init
+To redeploy after code changes, just push to `main` — Render Blueprints
+auto-deploy on push by default.
 
-# Backend
-cd backend
-railway up
-railway variables set DATABASE_URL=<postgres-plugin-connection-string>
-# Railway auto-detects the Procfile; if not, set the start command explicitly:
-railway run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+#### Manual setup (alternative to Blueprint)
 
-# Add a Postgres plugin from the Railway dashboard, then:
-railway variables set DATABASE_URL=$(railway variables get DATABASE_URL --plugin postgresql)
+If you'd rather configure services by hand instead of via `render.yaml`:
+- **Backend:** New → Web Service → root directory `backend`, build
+  `pip install -r requirements.txt`, start
+  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Attach a Postgres
+  instance and set `DATABASE_URL` to its connection string.
+- **Frontend:** New → Web Service → root directory `frontend`, build
+  `pip install -r requirements.txt`, start
+  `streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0`.
+  Set `API_BASE_URL` to the backend's public URL (include `https://`).
 
-# Frontend
-cd ../frontend
-railway up
-railway variables set API_BASE_URL=<backend-public-url>
-```
+#### Why not Vercel
 
-Both platforms inject `$PORT` and `DATABASE_URL` automatically once a
-Postgres addon is attached — `backend/app/models/db.py` already reads
-`DATABASE_URL` from the environment and falls back to local SQLite, so no
-code changes are needed between dev and prod.
+Vercel is built for static sites and serverless functions. Streamlit needs a
+long-lived process holding a WebSocket connection per user, which Vercel's
+serverless model doesn't support, and FastAPI here relies on a persistent
+DB connection pool rather than a stateless request/response function — both
+services are a better fit for Render's always-on web services.
 
 ---
 
