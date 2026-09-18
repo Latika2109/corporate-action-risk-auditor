@@ -1,0 +1,17 @@
+BSE Corporate Action Notice - Ref 2026/CA/8891
+ISIN: INE777888999
+Purpose: Stock Split
+Ratio: 1:10
+Ex-Date: 12-Dec-2026
+Record Date: 15-Dec-2026
+
+BSE Corporate Action Notice - Ref 2026/CA/8892
+ISIN: INE222333444
+Purpose: Bonus Issue
+Ratio: 1:2
+Ex-Date: 18-Dec-2026
+Record Date: 20-Dec-2026
+
+BSE Corporate Action Notice - Ref 2026/CA/8893
+Purpose: Notice withdrawn, superseded by later circular
+No ISIN or ratio present in this truncated entry

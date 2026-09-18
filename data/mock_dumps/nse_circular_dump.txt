@@ -1,0 +1,20 @@
+NSE/CML/2026/1122
+Sub: Corporate Action - Stock Split
+ISIN: INE777888999
+Company: SAMPLE LTD
+Ratio: 1-for-10
+Ex-Date: 12-Dec-2026
+Record Date: 14-Dec-2026
+
+NSE/CML/2026/1123
+Sub: Corporate Action - Bonus Issue
+ISIN: INE222333444
+Company: DEMO CORP
+Ratio: 1:2
+Ex-Date: 18-Dec-2026
+Record Date: 20-Dec-2026
+
+NSE/CML/2026/1124
+Sub: Corporate Action - garbled circular, layout mutated by upstream export
+COMPANY: BROKEN INC
+this row is intentionally malformed and should be quarantined
